@@ -10,8 +10,8 @@ module Tests where
 
 import Control.Applicative hiding (many)
 import Control.Arrow
-import Database.CQL.Protocol
-import Database.CQL.Protocol.Internal
+import Database.XCQL.Protocol
+import Database.XCQL.Protocol.Internal
 import Data.Decimal
 import Data.Int
 import Data.IP

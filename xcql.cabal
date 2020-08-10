@@ -44,19 +44,19 @@ library
     ghc-options:      -Wall -O2 -fwarn-tabs -funbox-strict-fields
 
     exposed-modules:
-        Database.CQL.Protocol
-        Database.CQL.Protocol.Internal
+        Database.XCQL.Protocol
+        Database.XCQL.Protocol.Internal
 
     other-modules:
-        Database.CQL.Protocol.Class
-        Database.CQL.Protocol.Codec
-        Database.CQL.Protocol.Record
-        Database.CQL.Protocol.Tuple
-        Database.CQL.Protocol.Tuple.TH
-        Database.CQL.Protocol.Types
-        Database.CQL.Protocol.Header
-        Database.CQL.Protocol.Request
-        Database.CQL.Protocol.Response
+        Database.XCQL.Protocol.Class
+        Database.XCQL.Protocol.Codec
+        Database.XCQL.Protocol.Record
+        Database.XCQL.Protocol.Tuple
+        Database.XCQL.Protocol.Tuple.TH
+        Database.XCQL.Protocol.Types
+        Database.XCQL.Protocol.Header
+        Database.XCQL.Protocol.Request
+        Database.XCQL.Protocol.Response
 
     if flag(incompatible-varint)
         cpp-options: -DINCOMPATIBLE_VARINT
