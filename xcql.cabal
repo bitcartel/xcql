@@ -1,4 +1,4 @@
-name:                 cql
+name:                 xcql
 version:              4.0.2
 synopsis:             Cassandra CQL binary protocol.
 stability:            experimental
@@ -88,7 +88,7 @@ test-suite cql-tests
           base
         , bytestring
         , cereal
-        , cql
+        , xcql
         , Decimal
         , iproute
         , network
