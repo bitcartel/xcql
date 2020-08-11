@@ -404,20 +404,20 @@ decodePagingState = fmap PagingState <$> decodeBytes
 -- Value
 
 putValue :: Version -> Putter Value
-putValue _ (CqlCustom x)    = toBytes $ putLazyByteString x
-putValue _ (CqlBoolean x)   = toBytes $ putWord8 $ if x then 1 else 0
-putValue _ (CqlInt x)       = toBytesInt $ put x
-putValue _ (CqlBigInt x)    = toBytesBigInt $ put x
-putValue _ (CqlFloat x)     = toBytes $ putFloat32be x
-putValue _ (CqlDouble x)    = toBytes $ putFloat64be x
-putValue _ (CqlText x)      = toBytesText $ putByteString (T.encodeUtf8 x)
-putValue _ (CqlUuid x)      = toBytes $ encodeUUID x
-putValue _ (CqlTimeUuid x)  = toBytes $ encodeUUID x
-putValue _ (CqlTimestamp x) = toBytes $ put x
-putValue _ (CqlAscii x)     = toBytes $ putByteString (T.encodeUtf8 x)
-putValue _ (CqlBlob x)      = toBytes $ putLazyByteString x
-putValue _ (CqlCounter x)   = toBytes $ put x
-putValue _ (CqlInet x)      = toBytes $ case x of
+putValue _ (CqlCustom x)    = {-# SCC "PVCustom" #-} toBytes $ putLazyByteString x
+putValue _ (CqlBoolean x)   = {-# SCC "PVBoolean" #-} toBytes $ putWord8 $ if x then 1 else 0
+putValue _ (CqlInt x)       = {-# SCC "PVInt" #-} toBytes $ put x
+putValue _ (CqlBigInt x)    = {-# SCC "PVBigInt" #-} toBytes $ put x
+putValue _ (CqlFloat x)     = {-# SCC "PVFloat" #-} toBytes $ putFloat32be x
+putValue _ (CqlDouble x)    = {-# SCC "PVDouble" #-} toBytes $ putFloat64be x
+putValue _ (CqlText x)      = {-# SCC "PVText" #-} toBytes $ putByteString (T.encodeUtf8 x)
+putValue _ (CqlUuid x)      = {-# SCC "PVUuid" #-} toBytes $ encodeUUID x
+putValue _ (CqlTimeUuid x)  = {-# SCC "PVTimeUuid" #-} toBytes $ encodeUUID x
+putValue _ (CqlTimestamp x) = {-# SCC "PVTimestamp" #-} toBytes $ put x
+putValue _ (CqlAscii x)     = {-# SCC "PVAscii" #-} toBytes $ putByteString (T.encodeUtf8 x)
+putValue _ (CqlBlob x)      = {-# SCC "PVBlob" #-} toBytes $ putLazyByteString x
+putValue _ (CqlCounter x)   = {-# SCC "PVCounter" #-} toBytes $ put x
+putValue _ (CqlInet x)      = {-# SCC "PVInet" #-} toBytes $ case x of
     IPv4 i -> putWord32le (toHostAddress i)
     IPv6 i -> do
         let (a, b, c, d) = toHostAddress6 i
@@ -425,31 +425,31 @@ putValue _ (CqlInet x)      = toBytes $ case x of
         putWord32host b
         putWord32host c
         putWord32host d
-putValue _ (CqlVarInt x)   = toBytes $ integer2bytes x
-putValue _ (CqlDecimal x)  = toBytes $ do
+putValue _ (CqlVarInt x)   = {-# SCC "PVVarInt" #-} toBytes $ integer2bytes x
+putValue _ (CqlDecimal x)  = {-# SCC "PVDecimal" #-} toBytes $ do
     put (fromIntegral (decimalPlaces x) :: Int32)
     integer2bytes (decimalMantissa x)
-putValue V4   (CqlDate x)     = toBytes $ put x
-putValue _  v@(CqlDate _)     = error $ "putValue: date: " ++ show v
-putValue V4   (CqlTime x)     = toBytes $ put x
+putValue V4   (CqlDate x)     = {-# SCC "PVDate" #-} toBytes $ put x
+putValue _  v@(CqlDate _)     = {-# SCC "PVDate" #-} error $ "putValue: date: " ++ show v
+putValue V4   (CqlTime x)     = {-# SCC "PVTime" #-} toBytes $ put x
 putValue _  v@(CqlTime _)     = error $ "putValue: time: " ++ show v
-putValue V4   (CqlSmallInt x) = toBytes $ put x
+putValue V4   (CqlSmallInt x) = {-# SCC "PVSmallInt" #-} toBytes $ put x
 putValue _  v@(CqlSmallInt _) = error $ "putValue: smallint: " ++ show v
-putValue V4   (CqlTinyInt x)  = toBytes $ put x
+putValue V4   (CqlTinyInt x)  = {-# SCC "PVTinyInt" #-} toBytes $ put x
 putValue _  v@(CqlTinyInt _)  = error $ "putValue: tinyint: " ++ show v
-putValue v    (CqlUdt   x)    = toBytes $ mapM_ (putValue v . snd) x
-putValue v    (CqlList x)     = toBytes $ do
+putValue v    (CqlUdt   x)    = {-# SCC "PVUdt" #-} toBytes $ mapM_ (putValue v . snd) x
+putValue v    (CqlList x)     = {-# SCC "PVList" #-} toBytes $ do
     encodeInt (fromIntegral (length x))
     mapM_ (putValue v) x
-putValue v (CqlSet x) = toBytes $ do
+putValue v (CqlSet x) = {-# SCC "PVSet" #-} toBytes $ do
     encodeInt (fromIntegral (length x))
     mapM_ (putValue v) x
-putValue v (CqlMap x) = toBytes $ do
+putValue v (CqlMap x) = {-# SCC "PVMap" #-} toBytes $ do
     encodeInt (fromIntegral (length x))
     forM_ x $ \(k, w) -> putValue v k >> putValue v w
-putValue v (CqlTuple x)        = toBytes $ mapM_ (putValue v) x
-putValue _ (CqlMaybe Nothing)  = put (-1 :: Int32)
-putValue v (CqlMaybe (Just x)) = putValue v x
+putValue v (CqlTuple x)        = {-# SCC "PVTuple" #-} toBytes $ mapM_ (putValue v) x
+putValue _ (CqlMaybe Nothing)  = {-# SCC "PVNothing" #-} put (-1 :: Int32)
+putValue v (CqlMaybe (Just x)) = {-# SCC "PVJust" #-} putValue v x
 
 getValue :: Version -> ColumnType -> Get Value
 getValue v (ListColumn t) = CqlList <$> getList (do
@@ -530,24 +530,6 @@ remainingBytesLazy = remaining >>= getLazyByteString . fromIntegral
 
 toBytes :: Put -> Put
 toBytes p = do
-    let bytes = runPut p
-    put (fromIntegral (B.length bytes) :: Int32)
-    putByteString bytes
-
-toBytesInt :: Put -> Put
-toBytesInt p = do
-    let bytes = runPut p
-    put (fromIntegral (B.length bytes) :: Int32)
-    putByteString bytes
-
-toBytesBigInt :: Put -> Put
-toBytesBigInt p = do
-    let bytes = runPut p
-    put (fromIntegral (B.length bytes) :: Int32)
-    putByteString bytes
-
-toBytesText :: Put -> Put
-toBytesText p = do
     let bytes = runPut p
     put (fromIntegral (B.length bytes) :: Int32)
     putByteString bytes
