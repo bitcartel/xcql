@@ -407,8 +407,8 @@ decodePagingState = fmap PagingState <$> decodeBytes
 putValue :: Version -> Putter Value
 putValue _ (CqlCustom x)    = {-# SCC "PVCustom" #-} toBytes $ putLazyByteString x
 putValue _ (CqlBoolean x)   = {-# SCC "PVBoolean" #-} toBytes $ putWord8 $ if x then 1 else 0
-putValue _ (CqlInt x)       = {-# SCC "PVInt" #-} putInt32le 4 >> put x
-putValue _ (CqlBigInt x)    = {-# SCC "PVBigInt" #-} putInt32le 8 >> put x
+putValue _ (CqlInt x)       = {-# SCC "PVInt" #-} put (4 :: Int32) >> put x
+putValue _ (CqlBigInt x)    = {-# SCC "PVBigInt" #-} put (8 :: Int32) >> put x
 putValue _ (CqlFloat x)     = {-# SCC "PVFloat" #-} toBytes $ putFloat32be x
 putValue _ (CqlDouble x)    = {-# SCC "PVDouble" #-} toBytes $ putFloat64be x
 putValue _ (CqlText x)      = {-# SCC "PVText" #-} let y = (T.encodeUtf8 x)
