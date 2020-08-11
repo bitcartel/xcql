@@ -67,6 +67,7 @@ import Control.Applicative
 import Control.Monad
 import Data.Bits
 import Data.ByteString (ByteString)
+import qualified Data.ByteString.Lazy as LB
 import Data.Decimal
 import Data.Int
 import Data.IP
@@ -410,12 +411,14 @@ putValue _ (CqlInt x)       = {-# SCC "PVInt" #-} toBytes $ put x
 putValue _ (CqlBigInt x)    = {-# SCC "PVBigInt" #-} toBytes $ put x
 putValue _ (CqlFloat x)     = {-# SCC "PVFloat" #-} toBytes $ putFloat32be x
 putValue _ (CqlDouble x)    = {-# SCC "PVDouble" #-} toBytes $ putFloat64be x
-putValue _ (CqlText x)      = {-# SCC "PVText" #-} toBytes $ putByteString (T.encodeUtf8 x)
+putValue _ (CqlText x)      = {-# SCC "PVText" #-} let y = (T.encodeUtf8 x)
+                                                   in put (fromIntegral (B.length y) :: Int32) >> putByteString y
 putValue _ (CqlUuid x)      = {-# SCC "PVUuid" #-} toBytes $ encodeUUID x
 putValue _ (CqlTimeUuid x)  = {-# SCC "PVTimeUuid" #-} toBytes $ encodeUUID x
 putValue _ (CqlTimestamp x) = {-# SCC "PVTimestamp" #-} toBytes $ put x
-putValue _ (CqlAscii x)     = {-# SCC "PVAscii" #-} toBytes $ putByteString (T.encodeUtf8 x)
-putValue _ (CqlBlob x)      = {-# SCC "PVBlob" #-} toBytes $ putLazyByteString x
+putValue _ (CqlAscii x)     = {-# SCC "PVAscii" #-} let y = (T.encodeUtf8 x)
+                                                    in put (fromIntegral (B.length y) :: Int32) >> putByteString y
+putValue _ (CqlBlob x)      = {-# SCC "PVBlob" #-} put (fromIntegral (LB.length x) :: Int32) >> putLazyByteString x
 putValue _ (CqlCounter x)   = {-# SCC "PVCounter" #-} toBytes $ put x
 putValue _ (CqlInet x)      = {-# SCC "PVInet" #-} toBytes $ case x of
     IPv4 i -> putWord32le (toHostAddress i)
