@@ -3,47 +3,47 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Database.XCQL.Protocol.Codec
-  ( encodeByte
-  , decodeByte
-  , encodeSignedByte
-  , decodeSignedByte
-  , encodeShort
-  , decodeShort
-  , encodeSignedShort
-  , decodeSignedShort
-  , encodeInt
-  , decodeInt
-  , encodeString
-  , decodeString
-  , encodeLongString
-  , decodeLongString
-  , encodeBytes
-  , decodeBytes
-  , encodeShortBytes
-  , decodeShortBytes
-  , encodeUUID
-  , decodeUUID
-  , encodeList
-  , decodeList
-  , encodeMap
-  , decodeMap
-  , encodeMultiMap
-  , decodeMultiMap
-  , encodeSockAddr
-  , decodeSockAddr
-  , encodeConsistency
-  , decodeConsistency
-  , encodeOpCode
-  , decodeOpCode
-  , encodePagingState
-  , decodePagingState
-  , decodeKeyspace
-  , decodeTable
-  , decodeColumnType
-  , decodeQueryId
-  , putValue
-  , getValue
-  ) where
+    ( encodeByte
+    , decodeByte
+    , encodeSignedByte
+    , decodeSignedByte
+    , encodeShort
+    , decodeShort
+    , encodeSignedShort
+    , decodeSignedShort
+    , encodeInt
+    , decodeInt
+    , encodeString
+    , decodeString
+    , encodeLongString
+    , decodeLongString
+    , encodeBytes
+    , decodeBytes
+    , encodeShortBytes
+    , decodeShortBytes
+    , encodeUUID
+    , decodeUUID
+    , encodeList
+    , decodeList
+    , encodeMap
+    , decodeMap
+    , encodeMultiMap
+    , decodeMultiMap
+    , encodeSockAddr
+    , decodeSockAddr
+    , encodeConsistency
+    , decodeConsistency
+    , encodeOpCode
+    , decodeOpCode
+    , encodePagingState
+    , decodePagingState
+    , decodeKeyspace
+    , decodeTable
+    , decodeColumnType
+    , decodeQueryId
+    , putValue
+    , getValue
+    ) where
 
 import Control.Applicative
 import Control.Monad
@@ -126,34 +126,34 @@ encodeLongString = encodeBytes . LT.encodeUtf8
 
 decodeLongString :: Get LT.Text
 decodeLongString = do
-  n <- get :: Get Int32
-  LT.decodeUtf8 <$> getLazyByteString (fromIntegral n)
+    n <- get :: Get Int32
+    LT.decodeUtf8 <$> getLazyByteString (fromIntegral n)
 
 ------------------------------------------------------------------------------
 -- Bytes
 encodeBytes :: Putter LB.ByteString
 encodeBytes bs = do
-  put (fromIntegral (LB.length bs) :: Int32)
-  putLazyByteString bs
+    put (fromIntegral (LB.length bs) :: Int32)
+    putLazyByteString bs
 
 decodeBytes :: Get (Maybe LB.ByteString)
 decodeBytes = do
-  n <- get :: Get Int32
-  if n < 0
-    then return Nothing
-    else Just <$> getLazyByteString (fromIntegral n)
+    n <- get :: Get Int32
+    if n < 0
+        then return Nothing
+        else Just <$> getLazyByteString (fromIntegral n)
 
 ------------------------------------------------------------------------------
 -- Short Bytes
 encodeShortBytes :: Putter ByteString
 encodeShortBytes bs = do
-  put (fromIntegral (B.length bs) :: Word16)
-  putByteString bs
+    put (fromIntegral (B.length bs) :: Word16)
+    putByteString bs
 
 decodeShortBytes :: Get ByteString
 decodeShortBytes = do
-  n <- get :: Get Word16
-  getByteString (fromIntegral n)
+    n <- get :: Get Word16
+    getByteString (fromIntegral n)
 
 ------------------------------------------------------------------------------
 -- UUID
@@ -162,87 +162,83 @@ encodeUUID = putLazyByteString . UUID.toByteString
 
 decodeUUID :: Get UUID
 decodeUUID = do
-  uuid <- UUID.fromByteString <$> getLazyByteString 16
-  maybe (fail "decode-uuid: invalid") return uuid
+    uuid <- UUID.fromByteString <$> getLazyByteString 16
+    maybe (fail "decode-uuid: invalid") return uuid
 
 ------------------------------------------------------------------------------
 -- String List
 encodeList :: Putter [Text]
 encodeList sl = do
-  put (fromIntegral (length sl) :: Word16)
-  mapM_ encodeString sl
+    put (fromIntegral (length sl) :: Word16)
+    mapM_ encodeString sl
 
 decodeList :: Get [Text]
 decodeList = do
-  n <- get :: Get Word16
-  replicateM (fromIntegral n) decodeString
+    n <- get :: Get Word16
+    replicateM (fromIntegral n) decodeString
 
 ------------------------------------------------------------------------------
 -- String Map
 encodeMap :: Putter [(Text, Text)]
 encodeMap m = do
-  put (fromIntegral (length m) :: Word16)
-  forM_ m $ \(k, v) -> encodeString k >> encodeString v
+    put (fromIntegral (length m) :: Word16)
+    forM_ m $ \(k, v) -> encodeString k >> encodeString v
 
 decodeMap :: Get [(Text, Text)]
 decodeMap = do
-  n <- get :: Get Word16
-  replicateM (fromIntegral n) ((,) <$> decodeString <*> decodeString)
+    n <- get :: Get Word16
+    replicateM (fromIntegral n) ((,) <$> decodeString <*> decodeString)
 
 ------------------------------------------------------------------------------
 -- String Multi-Map
 encodeMultiMap :: Putter [(Text, [Text])]
 encodeMultiMap mm = do
-  put (fromIntegral (length mm) :: Word16)
-  forM_ mm $ \(k, v) -> encodeString k >> encodeList v
+    put (fromIntegral (length mm) :: Word16)
+    forM_ mm $ \(k, v) -> encodeString k >> encodeList v
 
 decodeMultiMap :: Get [(Text, [Text])]
 decodeMultiMap = do
-  n <- get :: Get Word16
-  replicateM (fromIntegral n) ((,) <$> decodeString <*> decodeList)
+    n <- get :: Get Word16
+    replicateM (fromIntegral n) ((,) <$> decodeString <*> decodeList)
 
 ------------------------------------------------------------------------------
 -- Inet Address
 encodeSockAddr :: Putter SockAddr
 encodeSockAddr (SockAddrInet p a) = do
-  putWord8 4
-  putWord32le a
-  putWord32be (fromIntegral p)
+    putWord8 4
+    putWord32le a
+    putWord32be (fromIntegral p)
 encodeSockAddr (SockAddrInet6 p _ (a, b, c, d) _) = do
-  putWord8 16
-  putWord32host a
-  putWord32host b
-  putWord32host c
-  putWord32host d
-  putWord32be (fromIntegral p)
-encodeSockAddr (SockAddrUnix _) =
-  error "encode-socket: unix address not supported"
+    putWord8 16
+    putWord32host a
+    putWord32host b
+    putWord32host c
+    putWord32host d
+    putWord32be (fromIntegral p)
+encodeSockAddr (SockAddrUnix _) = error "encode-socket: unix address not supported"
 #if MIN_VERSION_network(2,6,1) && !MIN_VERSION_network(3,0,0)
-encodeSockAddr (SockAddrCan _) =
-  error "encode-socket: can address not supported"
+encodeSockAddr (SockAddrCan _) = error "encode-socket: can address not supported"
 #endif
 decodeSockAddr :: Get SockAddr
 decodeSockAddr = do
-  n <- getWord8
-  case n of
-    4 -> do
-      i <- getIPv4
-      p <- getPort
-      return $ SockAddrInet p i
-    16 -> do
-      i <- getIPv6
-      p <- getPort
-      return $ SockAddrInet6 p 0 i 0
-    _ -> fail $ "decode-socket: unknown: " ++ show n
+    n <- getWord8
+    case n of
+        4 -> do
+            i <- getIPv4
+            p <- getPort
+            return $ SockAddrInet p i
+        16 -> do
+            i <- getIPv6
+            p <- getPort
+            return $ SockAddrInet6 p 0 i 0
+        _ -> fail $ "decode-socket: unknown: " ++ show n
   where
     getPort :: Get PortNumber
     getPort = fromIntegral <$> getWord32be
     getIPv4 :: Get Word32
     getIPv4 = getWord32le
     getIPv6 :: Get (Word32, Word32, Word32, Word32)
-    getIPv6 =
-      (,,,) <$> getWord32host <*> getWord32host <*> getWord32host <*>
-      getWord32host
+    getIPv6 = (,,,) <$> getWord32host <*> getWord32host <*> getWord32host <*> getWord32host
 
 ------------------------------------------------------------------------------
 -- Consistency
@@ -343,19 +339,18 @@ decodeColumnType = decodeShort >>= toType
     toType 0x0013 = return SmallIntColumn
     toType 0x0014 = return TinyIntColumn
     toType 0x0020 = ListColumn <$> (decodeShort >>= toType)
-    toType 0x0021 =
-      MapColumn <$> (decodeShort >>= toType) <*> (decodeShort >>= toType)
+    toType 0x0021 = MapColumn <$> (decodeShort >>= toType) <*> (decodeShort >>= toType)
     toType 0x0022 = SetColumn <$> (decodeShort >>= toType)
     toType 0x0030 = do
-      _ <- decodeString -- Keyspace (not used by this library)
-      t <- decodeString -- Type name
-      UdtColumn t <$> do
-        n <- fromIntegral <$> decodeShort
-        replicateM n ((,) <$> decodeString <*> (decodeShort >>= toType))
+        _ <- decodeString -- Keyspace (not used by this library)
+        t <- decodeString -- Type name
+        UdtColumn t <$> do
+            n <- fromIntegral <$> decodeShort
+            replicateM n ((,) <$> decodeString <*> (decodeShort >>= toType))
     toType 0x0031 =
-      TupleColumn <$> do
-        n <- fromIntegral <$> decodeShort
-        replicateM n (decodeShort >>= toType)
+        TupleColumn <$> do
+            n <- fromIntegral <$> decodeShort
+            replicateM n (decodeShort >>= toType)
     toType other = fail $ "decode-type: unknown: " ++ show other
 
 ------------------------------------------------------------------------------
@@ -373,29 +368,29 @@ putValue _ (CqlMaybe Nothing) = {-# SCC "PVNothing" #-} put (-1 :: Int32)
 putValue v (CqlMaybe (Just x)) = {-# SCC "PVJust" #-} putValue v x
 putValue _ (CqlCustom x) = {-# SCC "PVCustom" #-} toBytes $ putLazyByteString x
 putValue _ (CqlBoolean x) =
-  {-# SCC "PVBoolean" #-}
+    {-# SCC "PVBoolean" #-}
   put (1 :: Int32) >> (putWord8 $ if x then 1 else 0)
 putValue _ (CqlInt x) = {-# SCC "PVInt" #-} put (4 :: Int32) >> put x
 putValue _ (CqlBigInt x) = {-# SCC "PVBigInt" #-} put (8 :: Int32) >> put x
 putValue _ (CqlFloat x) = {-# SCC "PVFloat" #-} toBytes $ putFloat32be x
 putValue _ (CqlDouble x) = {-# SCC "PVDouble" #-} toBytes $ putFloat64be x
 putValue _ (CqlText x) =
-  {-# SCC "PVText" #-}
+    {-# SCC "PVText" #-}
   let y = (T.encodeUtf8 x) in
     put (fromIntegral (B.length y) :: Int32) >> putByteString y
 putValue _ (CqlUuid x) = {-# SCC "PVUuid" #-} toBytes $ encodeUUID x
 putValue _ (CqlTimeUuid x) = {-# SCC "PVTimeUuid" #-} toBytes $ encodeUUID x
 putValue _ (CqlTimestamp x) = {-# SCC "PVTimestamp" #-} toBytes $ put x
 putValue _ (CqlAscii x) =
-  {-# SCC "PVAscii" #-}
+    {-# SCC "PVAscii" #-}
   let y = (T.encodeUtf8 x) in
     put (fromIntegral (B.length y) :: Int32) >> putByteString y
 putValue _ (CqlBlob x) =
-  {-# SCC "PVBlob" #-}
+    {-# SCC "PVBlob" #-}
   put (fromIntegral (LB.length x) :: Int32) >> putLazyByteString x
 putValue _ (CqlCounter x) = {-# SCC "PVCounter" #-} toBytes $ put x
 putValue _ (CqlInet x) =
-  {-# SCC "PVInet" #-}
+    {-# SCC "PVInet" #-}
   toBytes $
     case x of
         IPv4 i -> putWord32le (toHostAddress i)
@@ -406,13 +401,12 @@ putValue _ (CqlInet x) =
                      putWord32host d
 putValue _ (CqlVarInt x) = {-# SCC "PVVarInt" #-} toBytes $ integer2bytes x
 putValue _ (CqlDecimal x) =
-  {-# SCC "PVDecimal" #-}
+    {-# SCC "PVDecimal" #-}
   toBytes $
     do put (fromIntegral (decimalPlaces x) :: Int32)
        integer2bytes (decimalMantissa x)
 putValue V4 (CqlDate x) = {-# SCC "PVDate" #-} toBytes $ put x
-putValue _ v@(CqlDate _) =
-  {-# SCC "PVDate" #-} error $ "putValue: date: " ++ show v
+putValue _ v@(CqlDate _) = {-# SCC "PVDate" #-} error $ "putValue: date: " ++ show v
 putValue V4 (CqlTime x) = {-# SCC "PVTime" #-} toBytes $ put x
 putValue _ v@(CqlTime _) = error $ "putValue: time: " ++ show v
 putValue V4 (CqlSmallInt x) = {-# SCC "PVSmallInt" #-} toBytes $ put x
@@ -421,24 +415,24 @@ putValue V4 (CqlTinyInt x) = {-# SCC "PVTinyInt" #-} toBytes $ put x
 putValue _ v@(CqlTinyInt _) = error $ "putValue: tinyint: " ++ show v
 putValue v (CqlUdt x) = {-# SCC "PVUdt" #-} toBytes $ mapM_ (putValue v . snd) x
 putValue v (CqlList x) =
-  {-# SCC "PVList" #-}
+    {-# SCC "PVList" #-}
   toBytes $
     do encodeInt (fromIntegral (length x))
        mapM_ (putValue v) x
 putValue v (CqlSet x) =
-  {-# SCC "PVSet" #-}
+    {-# SCC "PVSet" #-}
   toBytes $
     do encodeInt (fromIntegral (length x))
        mapM_ (putValue v) x
 putValue v (CqlMap x) =
-  {-# SCC "PVMap" #-}
+    {-# SCC "PVMap" #-}
   toBytes $
     do encodeInt (fromIntegral (length x))
        forM_ x $ \ (k, w) -> putValue v k >> putValue v w
 -- putValue v (CqlTuple x) = {-# SCC "PVTuple" #-} toBytes $ mapM_ (putValue v) x
 --
 putValue v (CqlTuple x) =
-  {-# SCC "PVTuple" #-}
+    {-# SCC "PVTuple" #-}
   let y = mapM (putValue' v) x in
     put ((fromIntegral $ sum (snd y)) :: Int32) >> fst y
 
@@ -446,18 +440,16 @@ putValue v (CqlTuple x) =
 --
 --
 putValue' :: Version -> Value -> (Put, Int32)
-putValue' _ (CqlCustom x) =
-  {-# SCC "PVCustom" #-} toBytes' $ putLazyByteString x
+putValue' _ (CqlCustom x) = {-# SCC "PVCustom" #-} toBytes' $ putLazyByteString x
 putValue' _ (CqlBoolean x) =
-  {-# SCC "PVBoolean" #-}
+    {-# SCC "PVBoolean" #-}
   (put (1 :: Int32) >> (putWord8 $ if x then 1 else 0), 4 + 1)
 putValue' _ (CqlInt x) = {-# SCC "PVInt" #-} (put (4 :: Int32) >> put x, 4 + 4)
-putValue' _ (CqlBigInt x) =
-  {-# SCC "PVBigInt" #-} (put (8 :: Int32) >> put x, 8 + 4)
+putValue' _ (CqlBigInt x) = {-# SCC "PVBigInt" #-} (put (8 :: Int32) >> put x, 8 + 4)
 putValue' _ (CqlFloat x) = {-# SCC "PVFloat" #-} toBytes' $ putFloat32be x
 putValue' _ (CqlDouble x) = {-# SCC "PVDouble" #-} toBytes' $ putFloat64be x
 putValue' _ (CqlText x) =
-  {-# SCC "PVText" #-}
+    {-# SCC "PVText" #-}
   let y = (T.encodeUtf8 x)
       l = (fromIntegral (B.length y) :: Int32)
     in (put l >> putByteString y, l + 4)
@@ -465,17 +457,17 @@ putValue' _ (CqlUuid x) = {-# SCC "PVUuid" #-} toBytes' $ encodeUUID x
 putValue' _ (CqlTimeUuid x) = {-# SCC "PVTimeUuid" #-} toBytes' $ encodeUUID x
 putValue' _ (CqlTimestamp x) = {-# SCC "PVTimestamp" #-} toBytes' $ put x
 putValue' _ (CqlAscii x) =
-  {-# SCC "PVAscii" #-}
+    {-# SCC "PVAscii" #-}
   let y = (T.encodeUtf8 x)
       l = (fromIntegral (B.length y) :: Int32)
     in (put l >> putByteString y, l + 4)
 putValue' _ (CqlBlob x) =
-  {-# SCC "PVBlob" #-}
+    {-# SCC "PVBlob" #-}
   let l = (fromIntegral (LB.length x) :: Int32) in
     (put l >> putLazyByteString x, l + 4)
 putValue' _ (CqlCounter x) = {-# SCC "PVCounter" #-} toBytes' $ put x
 putValue' _ (CqlInet x) =
-  {-# SCC "PVInet" #-}
+    {-# SCC "PVInet" #-}
   toBytes' $
     case x of
         IPv4 i -> putWord32le (toHostAddress i)
@@ -486,33 +478,31 @@ putValue' _ (CqlInet x) =
                      putWord32host d
 putValue' _ (CqlVarInt x) = {-# SCC "PVVarInt" #-} toBytes' $ integer2bytes x
 putValue' _ (CqlDecimal x) =
-  {-# SCC "PVDecimal" #-}
+    {-# SCC "PVDecimal" #-}
   toBytes' $
     do put (fromIntegral (decimalPlaces x) :: Int32)
        integer2bytes (decimalMantissa x)
 putValue' V4 (CqlDate x) = {-# SCC "PVDate" #-} toBytes' $ put x
-putValue' _ v@(CqlDate _) =
-  {-# SCC "PVDate" #-} error $ "putValue': date: " ++ show v
+putValue' _ v@(CqlDate _) = {-# SCC "PVDate" #-} error $ "putValue': date: " ++ show v
 putValue' V4 (CqlTime x) = {-# SCC "PVTime" #-} toBytes' $ put x
 putValue' _ v@(CqlTime _) = error $ "putValue': time: " ++ show v
 putValue' V4 (CqlSmallInt x) = {-# SCC "PVSmallInt" #-} toBytes' $ put x
 putValue' _ v@(CqlSmallInt _) = error $ "putValue': smallint: " ++ show v
 putValue' V4 (CqlTinyInt x) = {-# SCC "PVTinyInt" #-} toBytes' $ put x
 putValue' _ v@(CqlTinyInt _) = error $ "putValue': tinyint: " ++ show v
-putValue' v (CqlUdt x) =
-  {-# SCC "PVUdt" #-} toBytes' $ mapM_ (putValue v . snd) x
+putValue' v (CqlUdt x) = {-# SCC "PVUdt" #-} toBytes' $ mapM_ (putValue v . snd) x
 putValue' v (CqlList x) =
-  {-# SCC "PVList" #-}
+    {-# SCC "PVList" #-}
   toBytes' $
     do encodeInt (fromIntegral (length x))
        mapM_ (putValue v) x
 putValue' v (CqlSet x) =
-  {-# SCC "PVSet" #-}
+    {-# SCC "PVSet" #-}
   toBytes' $
     do encodeInt (fromIntegral (length x))
        mapM_ (putValue v) x
 putValue' v (CqlMap x) =
-  {-# SCC "PVMap" #-}
+    {-# SCC "PVMap" #-}
   toBytes' $
     do encodeInt (fromIntegral (length x))
        forM_ x $ \ (k, w) -> putValue v k >> putValue v w
@@ -520,7 +510,7 @@ putValue' v (CqlMap x) =
 --
 --
 putValue' v (CqlTuple x) =
-  {-# SCC "PVTuple" #-}
+    {-# SCC "PVTuple" #-}
   let y = mapM (putValue' v) x
       l = fromIntegral $ sum (snd y)
     in ((put (l :: Int32) >> fst y), l + 4)
@@ -531,35 +521,35 @@ putValue' v (CqlMaybe (Just x)) = {-# SCC "PVJust" #-} putValue' v x
 
 toBytes' :: Put -> (Put, Int32)
 toBytes' p = do
-  let bytes = runPut p
-      len = fromIntegral (B.length bytes) :: Int32
-  (put len >> putByteString bytes, len + 4)
+    let bytes = runPut p
+        len = fromIntegral (B.length bytes) :: Int32
+    (put len >> putByteString bytes, len + 4)
 
 --
 --
 --
 getValue :: Version -> ColumnType -> Get Value
 getValue v (ListColumn t) =
-  CqlList <$>
-  getList
-    (do len <- decodeInt
-        replicateM (fromIntegral len) (getValue v t))
+    CqlList <$>
+    getList
+        (do len <- decodeInt
+            replicateM (fromIntegral len) (getValue v t))
 getValue v (SetColumn t) =
-  CqlSet <$>
-  getList
-    (do len <- decodeInt
-        replicateM (fromIntegral len) (getValue v t))
+    CqlSet <$>
+    getList
+        (do len <- decodeInt
+            replicateM (fromIntegral len) (getValue v t))
 getValue v (MapColumn t u) =
-  CqlMap <$>
-  getList
-    (do len <- decodeInt
-        replicateM (fromIntegral len) ((,) <$> getValue v t <*> getValue v u))
+    CqlMap <$>
+    getList
+        (do len <- decodeInt
+            replicateM (fromIntegral len) ((,) <$> getValue v t <*> getValue v u))
 getValue v (TupleColumn t) = withBytes $ CqlTuple <$> mapM (getValue v) t
 getValue v (MaybeColumn t) = do
-  n <- lookAhead (get :: Get Int32)
-  if n < 0
-    then uncheckedSkip 4 >> return (CqlMaybe Nothing)
-    else CqlMaybe . Just <$> getValue v t
+    n <- lookAhead (get :: Get Int32)
+    if n < 0
+        then uncheckedSkip 4 >> return (CqlMaybe Nothing)
+        else CqlMaybe . Just <$> getValue v t
 getValue _ (CustomColumn _) = withBytes $ CqlCustom <$> remainingBytesLazy
 getValue _ BooleanColumn = withBytes $ CqlBoolean . (/= 0) <$> getWord8
 getValue _ IntColumn = withBytes $ CqlInt <$> get
@@ -575,17 +565,15 @@ getValue _ TimeUuidColumn = withBytes $ CqlTimeUuid <$> decodeUUID
 getValue _ TimestampColumn = withBytes $ CqlTimestamp <$> get
 getValue _ CounterColumn = withBytes $ CqlCounter <$> get
 getValue _ InetColumn =
-  withBytes $
-  CqlInet <$> do
-    len <- remaining
-    case len of
-      4 -> IPv4 . fromHostAddress <$> getWord32le
-      16 -> do
-        a <-
-          (,,,) <$> getWord32host <*> getWord32host <*> getWord32host <*>
-          getWord32host
-        return $ IPv6 (fromHostAddress6 a)
-      n -> fail $ "getNative: invalid Inet length: " ++ show n
+    withBytes $
+    CqlInet <$> do
+        len <- remaining
+        case len of
+            4 -> IPv4 . fromHostAddress <$> getWord32le
+            16 -> do
+                a <- (,,,) <$> getWord32host <*> getWord32host <*> getWord32host <*> getWord32host
+                return $ IPv6 (fromHostAddress6 a)
+            n -> fail $ "getNative: invalid Inet length: " ++ show n
 getValue V4 DateColumn = withBytes $ CqlDate <$> get
 getValue _ DateColumn = fail "getNative: date type"
 getValue V4 TimeColumn = withBytes $ CqlTime <$> get
@@ -596,31 +584,31 @@ getValue V4 TinyIntColumn = withBytes $ CqlTinyInt <$> get
 getValue _ TinyIntColumn = fail "getNative: tinyint type"
 getValue _ VarIntColumn = withBytes $ CqlVarInt <$> bytes2integer
 getValue _ DecimalColumn =
-  withBytes $ do
-    x <- get :: Get Int32
-    y <- bytes2integer
-    return (CqlDecimal (Decimal (fromIntegral x) y))
+    withBytes $ do
+        x <- get :: Get Int32
+        y <- bytes2integer
+        return (CqlDecimal (Decimal (fromIntegral x) y))
 getValue v (UdtColumn _ x) =
-  withBytes $
-  CqlUdt <$> do
-    let (n, t) = unzip x
-    zip n <$> mapM (getValue v) t
+    withBytes $
+    CqlUdt <$> do
+        let (n, t) = unzip x
+        zip n <$> mapM (getValue v) t
 
 getList :: Get [a] -> Get [a]
 getList m = do
-  n <- lookAhead (get :: Get Int32)
-  if n < 0
-    then uncheckedSkip 4 >> return []
-    else withBytes m
+    n <- lookAhead (get :: Get Int32)
+    if n < 0
+        then uncheckedSkip 4 >> return []
+        else withBytes m
 
 withBytes :: Get a -> Get a
 withBytes p = do
-  n <- fromIntegral <$> (get :: Get Int32)
-  when (n < 0) $ fail $ "withBytes: null (length = " ++ show n ++ ")"
-  b <- getBytes n
-  case runGet p b of
-    Left e -> fail $ "withBytes: " ++ e
-    Right x -> return x
+    n <- fromIntegral <$> (get :: Get Int32)
+    when (n < 0) $ fail $ "withBytes: null (length = " ++ show n ++ ")"
+    b <- getBytes n
+    case runGet p b of
+        Left e -> fail $ "withBytes: " ++ e
+        Right x -> return x
 
 remainingBytes :: Get ByteString
 remainingBytes = remaining >>= getByteString . fromIntegral
@@ -630,9 +618,9 @@ remainingBytesLazy = remaining >>= getLazyByteString . fromIntegral
 
 toBytes :: Put -> Put
 toBytes p = do
-  let bytes = runPut p
-  put (fromIntegral (B.length bytes) :: Int32)
-  putByteString bytes
+    let bytes = runPut p
+    put (fromIntegral (B.length bytes) :: Int32)
+    putByteString bytes
 #ifdef INCOMPATIBLE_VARINT
 -- 'integer2bytes' and 'bytes2integer' implementations are taken
 -- from cereal's instance declaration of 'Serialize' for 'Integer'
@@ -640,8 +628,8 @@ toBytes p = do
 -- Cf. to LICENSE for copyright details.
 integer2bytes :: Putter Integer
 integer2bytes n = do
-  put sign
-  put (unroll (abs n))
+    put sign
+    put (unroll (abs n))
   where
     sign = fromIntegral (signum n) :: Word8
     unroll :: Integer -> [Word8]
@@ -652,13 +640,13 @@ integer2bytes n = do
 
 bytes2integer :: Get Integer
 bytes2integer = do
-  sign <- get
-  bytes <- get
-  let v = roll bytes
-  return $!
-    if sign == (1 :: Word8)
-      then v
-      else -v
+    sign <- get
+    bytes <- get
+    let v = roll bytes
+    return $!
+        if sign == (1 :: Word8)
+            then v
+            else -v
   where
     roll :: [Word8] -> Integer
     roll = foldr unstep 0
@@ -667,31 +655,31 @@ bytes2integer = do
 #else
 integer2bytes :: Putter Integer
 integer2bytes n
-  | n == 0 = putWord8 0x00
-  | n == -1 = putWord8 0xFF
-  | n < 0 = do
-    let bytes = explode (-1) n
-    unless (head bytes >= 0x80) $ putWord8 0xFF
-    mapM_ putWord8 bytes
-  | otherwise = do
-    let bytes = explode 0 n
-    unless (head bytes < 0x80) $ putWord8 0x00
-    mapM_ putWord8 bytes
+    | n == 0 = putWord8 0x00
+    | n == -1 = putWord8 0xFF
+    | n < 0 = do
+        let bytes = explode (-1) n
+        unless (head bytes >= 0x80) $ putWord8 0xFF
+        mapM_ putWord8 bytes
+    | otherwise = do
+        let bytes = explode 0 n
+        unless (head bytes < 0x80) $ putWord8 0x00
+        mapM_ putWord8 bytes
 
 explode :: Integer -> Integer -> [Word8]
 explode x n = loop n []
   where
     loop !i !acc
-      | i == x = acc
-      | otherwise = loop (i `shiftR` 8) (fromIntegral i : acc)
+        | i == x = acc
+        | otherwise = loop (i `shiftR` 8) (fromIntegral i : acc)
 
 bytes2integer :: Get Integer
 bytes2integer = do
-  msb <- getWord8
-  bytes <- B.unpack <$> remainingBytes
-  if msb < 0x80
-    then return (implode (msb : bytes))
-    else return (-(implode (map complement (msb : bytes)) + 1))
+    msb <- getWord8
+    bytes <- B.unpack <$> remainingBytes
+    if msb < 0x80
+        then return (implode (msb : bytes))
+        else return (-(implode (map complement (msb : bytes)) + 1))
 
 implode :: [Word8] -> Integer
 implode = foldl' fun 0

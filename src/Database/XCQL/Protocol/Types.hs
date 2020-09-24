@@ -1,35 +1,50 @@
 module Database.XCQL.Protocol.Types where
 
 import Data.ByteString (ByteString)
-import Data.Text (Text, pack, unpack)
 import Data.Decimal
-import Data.Int
 import Data.IP
+import Data.Int
 import Data.String
+import Data.Text (Text, pack, unpack)
 import Data.UUID (UUID)
 
 import qualified Data.ByteString.Lazy as LB
-import qualified Data.List            as List
-import qualified Data.Set             as Set
-import qualified Data.Map.Strict      as Map
-import qualified Data.Text.Lazy       as LT
+import qualified Data.List as List
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
+import qualified Data.Text.Lazy as LT
 
-newtype Keyspace = Keyspace
-    { unKeyspace :: Text } deriving (Eq, Show)
+newtype Keyspace =
+    Keyspace
+        { unKeyspace :: Text
+        }
+    deriving (Eq, Show)
 
-newtype Table = Table
-    { unTable :: Text } deriving (Eq, Show)
+newtype Table =
+    Table
+        { unTable :: Text
+        }
+    deriving (Eq, Show)
 
 -- | Opaque token passed to the server to continue result paging.
-newtype PagingState = PagingState
-    { unPagingState :: LB.ByteString } deriving (Eq, Show)
+newtype PagingState =
+    PagingState
+        { unPagingState :: LB.ByteString
+        }
+    deriving (Eq, Show)
 
 -- | ID representing a prepared query.
-newtype QueryId k a b = QueryId
-    { unQueryId :: ByteString } deriving (Eq, Show)
+newtype QueryId k a b =
+    QueryId
+        { unQueryId :: ByteString
+        }
+    deriving (Eq, Show)
 
-newtype QueryString k a b = QueryString
-    { unQueryString :: LT.Text } deriving (Eq, Show)
+newtype QueryString k a b =
+    QueryString
+        { unQueryString :: LT.Text
+        }
+    deriving (Eq, Show)
 
 instance IsString (QueryString k a b) where
     fromString = QueryString . LT.pack
@@ -52,11 +67,12 @@ data CompressionAlgorithm
     | None
     deriving (Eq, Show)
 
-data Compression = Compression
-    { algorithm :: !CompressionAlgorithm
-    , shrink    :: LB.ByteString -> Maybe LB.ByteString
-    , expand    :: LB.ByteString -> Maybe LB.ByteString
-    }
+data Compression =
+    Compression
+        { algorithm :: !CompressionAlgorithm
+        , shrink :: LB.ByteString -> Maybe LB.ByteString
+        , expand :: LB.ByteString -> Maybe LB.ByteString
+        }
 
 instance Show Compression where
     show = show . algorithm
@@ -76,8 +92,8 @@ data Consistency
     | Quorum
     | LocalQuorum
     | All
-    | EachQuorum  -- ^ Only for write queries.
-    | Serial      -- ^ Only for read queries.
+    | EachQuorum -- ^ Only for write queries.
+    | Serial -- ^ Only for read queries.
     | LocalSerial -- ^ Only for read queries.
     deriving (Eq, Show)
 
@@ -121,11 +137,11 @@ data ColumnType
     | TimeUuidColumn
     | InetColumn
     | MaybeColumn !ColumnType
-    | ListColumn  !ColumnType
-    | SetColumn   !ColumnType
-    | MapColumn   !ColumnType !ColumnType
+    | ListColumn !ColumnType
+    | SetColumn !ColumnType
+    | MapColumn !ColumnType !ColumnType
     | TupleColumn [ColumnType]
-    | UdtColumn   !Text [(Text, ColumnType)]
+    | UdtColumn !Text [(Text, ColumnType)]
     | DateColumn
     | TimeColumn
     | SmallIntColumn
@@ -133,52 +149,70 @@ data ColumnType
     deriving (Eq)
 
 instance Show ColumnType where
-    show (CustomColumn a)  = unpack a
-    show AsciiColumn       = "ascii"
-    show BigIntColumn      = "bigint"
-    show BlobColumn        = "blob"
-    show BooleanColumn     = "boolean"
-    show CounterColumn     = "counter"
-    show DecimalColumn     = "decimal"
-    show DoubleColumn      = "double"
-    show FloatColumn       = "float"
-    show IntColumn         = "int"
-    show TextColumn        = "text"
-    show TimestampColumn   = "timestamp"
-    show UuidColumn        = "uuid"
-    show VarCharColumn     = "varchar"
-    show VarIntColumn      = "varint"
-    show TimeUuidColumn    = "timeuuid"
-    show InetColumn        = "inet"
-    show DateColumn        = "date"
-    show TimeColumn        = "time"
-    show SmallIntColumn    = "smallint"
-    show TinyIntColumn     = "tinyint"
-    show (MaybeColumn a)   = show a ++ "?"
-    show (ListColumn a)    = showString "list<" . shows a . showString ">" $ ""
-    show (SetColumn a)     = showString "set<" . shows a . showString ">" $ ""
-    show (MapColumn a b)   = showString "map<"
-                           . shows a
-                           . showString ", "
-                           . shows b
-                           . showString ">"
-                           $ ""
-    show (TupleColumn a)   = showString "tuple<"
-                           . showString (List.intercalate ", " (map show a))
-                           . showString ">"
-                           $ ""
-    show (UdtColumn t f)   = showString (unpack t)
-                           . showString "<"
-                           . shows (List.intercalate ", " (map show f))
-                           . showString ">"
-                           $ ""
+    show (CustomColumn a) = unpack a
+    show AsciiColumn = "ascii"
+    show BigIntColumn = "bigint"
+    show BlobColumn = "blob"
+    show BooleanColumn = "boolean"
+    show CounterColumn = "counter"
+    show DecimalColumn = "decimal"
+    show DoubleColumn = "double"
+    show FloatColumn = "float"
+    show IntColumn = "int"
+    show TextColumn = "text"
+    show TimestampColumn = "timestamp"
+    show UuidColumn = "uuid"
+    show VarCharColumn = "varchar"
+    show VarIntColumn = "varint"
+    show TimeUuidColumn = "timeuuid"
+    show InetColumn = "inet"
+    show DateColumn = "date"
+    show TimeColumn = "time"
+    show SmallIntColumn = "smallint"
+    show TinyIntColumn = "tinyint"
+    show (MaybeColumn a) = show a ++ "?"
+    show (ListColumn a) = showString "list<" . shows a . showString ">" $ ""
+    show (SetColumn a) = showString "set<" . shows a . showString ">" $ ""
+    show (MapColumn a b) = showString "map<" . shows a . showString ", " . shows b . showString ">" $ ""
+    show (TupleColumn a) = showString "tuple<" . showString (List.intercalate ", " (map show a)) . showString ">" $ ""
+    show (UdtColumn t f) =
+        showString (unpack t) . showString "<" . shows (List.intercalate ", " (map show f)) . showString ">" $ ""
 
-newtype Ascii    = Ascii    { fromAscii    :: Text          } deriving (Eq, Ord, Show)
-newtype Blob     = Blob     { fromBlob     :: LB.ByteString } deriving (Eq, Ord, Show)
-newtype Counter  = Counter  { fromCounter  :: Int64         } deriving (Eq, Ord, Show)
-newtype TimeUuid = TimeUuid { fromTimeUuid :: UUID          } deriving (Eq, Ord, Show)
-newtype Set a    = Set      { fromSet      :: [a]           } deriving Show
-newtype Map a b  = Map      { fromMap      :: [(a, b)]      } deriving Show
+newtype Ascii =
+    Ascii
+        { fromAscii :: Text
+        }
+    deriving (Eq, Ord, Show)
+
+newtype Blob =
+    Blob
+        { fromBlob :: LB.ByteString
+        }
+    deriving (Eq, Ord, Show)
+
+newtype Counter =
+    Counter
+        { fromCounter :: Int64
+        }
+    deriving (Eq, Ord, Show)
+
+newtype TimeUuid =
+    TimeUuid
+        { fromTimeUuid :: UUID
+        }
+    deriving (Eq, Ord, Show)
+
+newtype Set a =
+    Set
+        { fromSet :: [a]
+        }
+    deriving (Show)
+
+newtype Map a b =
+    Map
+        { fromMap :: [(a, b)]
+        }
+    deriving (Show)
 
 instance IsString Ascii where
     fromString = Ascii . pack
@@ -192,44 +226,48 @@ instance (Eq k, Eq v, Ord k) => Eq (Map k v) where
 -- | A CQL value. The various constructors correspond to CQL data-types for
 -- individual columns in Cassandra.
 data Value
-    = CqlCustom    !LB.ByteString
-    | CqlBoolean   !Bool
-    | CqlInt       !Int32
-    | CqlBigInt    !Int64
-    | CqlVarInt    !Integer
-    | CqlFloat     !Float
-    | CqlDecimal   !Decimal
-    | CqlDouble    !Double
-    | CqlText      !Text
-    | CqlInet      !IP
-    | CqlUuid      !UUID
+    = CqlCustom !LB.ByteString
+    | CqlBoolean !Bool
+    | CqlInt !Int32
+    | CqlBigInt !Int64
+    | CqlVarInt !Integer
+    | CqlFloat !Float
+    | CqlDecimal !Decimal
+    | CqlDouble !Double
+    | CqlText !Text
+    | CqlInet !IP
+    | CqlUuid !UUID
     | CqlTimestamp !Int64
-    | CqlAscii     !Text
-    | CqlBlob      !LB.ByteString
-    | CqlCounter   !Int64
-    | CqlTimeUuid  !UUID
-    | CqlMaybe     (Maybe Value)
-    | CqlList      [Value]
-    | CqlSet       [Value]
-    | CqlMap       [(Value, Value)]
-    | CqlTuple     [Value]
-    | CqlUdt       [(Text, Value)]
-    | CqlDate      !Int32
-    | CqlTime      !Int64
-    | CqlSmallInt  !Int16
-    | CqlTinyInt   !Int8
+    | CqlAscii !Text
+    | CqlBlob !LB.ByteString
+    | CqlCounter !Int64
+    | CqlTimeUuid !UUID
+    | CqlMaybe (Maybe Value)
+    | CqlList [Value]
+    | CqlSet [Value]
+    | CqlMap [(Value, Value)]
+    | CqlTuple [Value]
+    | CqlUdt [(Text, Value)]
+    | CqlDate !Int32
+    | CqlTime !Int64
+    | CqlSmallInt !Int16
+    | CqlTinyInt !Int8
     deriving (Eq, Show)
 
 -- | Tag some value with a phantom type.
-newtype Tagged a b = Tagged { untag :: b }
+newtype Tagged a b =
+    Tagged
+        { untag :: b
+        }
 
 retag :: Tagged a c -> Tagged b c
 retag = Tagged . untag
 
 -- | Type tag for read queries, i.e. 'QueryString R a b'.
 data R
+
 -- | Type tag for write queries, i.e. 'QueryString W a b'.
 data W
+
 -- | Type tag for schema queries, i.e. 'QueryString S a b'.
 data S
-

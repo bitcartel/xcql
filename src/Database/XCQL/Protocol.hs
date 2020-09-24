@@ -44,98 +44,76 @@
 -- @
 --
 module Database.XCQL.Protocol
-    ( -- * Cql type-class
-      Cql (..)
-
+      -- * Cql type-class
+    ( Cql(..)
       -- * Basic type definitions
     , module Database.XCQL.Protocol.Types
-
       -- * Header
-    , Header     (..)
-    , HeaderType (..)
+    , Header(..)
+    , HeaderType(..)
     , header
-
       -- ** Length
-    , Length (..)
-
+    , Length(..)
       -- ** StreamId
     , StreamId
     , mkStreamId
     , fromStreamId
-
       -- ** Flags
     , Flags
     , compress
     , tracing
     , isSet
-
       -- * Request
-    , Request (..)
+    , Request(..)
     , getOpCode
     , pack
-
       -- ** Options
-    , Options (..)
-
+    , Options(..)
       -- ** Startup
-    , Startup (..)
-
+    , Startup(..)
       -- ** Auth Response
-    , AuthResponse (..)
-
+    , AuthResponse(..)
       -- ** Register
-    , Register  (..)
-    , EventType (..)
-
+    , Register(..)
+    , EventType(..)
       -- ** Query
-    , Query             (..)
-    , QueryParams       (..)
-    , SerialConsistency (..)
-
+    , Query(..)
+    , QueryParams(..)
+    , SerialConsistency(..)
       -- ** Batch
-    , Batch      (..)
-    , BatchQuery (..)
-    , BatchType  (..)
-
+    , Batch(..)
+    , BatchQuery(..)
+    , BatchType(..)
       -- ** Prepare
-    , Prepare (..)
-
+    , Prepare(..)
       -- ** Execute
-    , Execute (..)
-
+    , Execute(..)
       -- * Response
-    , Response (..)
+    , Response(..)
     , warnings
     , traceId
     , unpack
-
       -- ** Ready
-    , Ready (..)
-
+    , Ready(..)
       -- ** Authenticate
-    , Authenticate  (..)
-    , AuthChallenge (..)
-    , AuthSuccess   (..)
-
+    , Authenticate(..)
+    , AuthChallenge(..)
+    , AuthSuccess(..)
       -- ** Result
-    , Result     (..)
-    , MetaData   (..)
-    , ColumnSpec (..)
-
+    , Result(..)
+    , MetaData(..)
+    , ColumnSpec(..)
       -- ** Supported
-    , Supported  (..)
-
+    , Supported(..)
       -- ** Event
-    , Event          (..)
-    , TopologyChange (..)
-    , SchemaChange   (..)
-    , StatusChange   (..)
-    , Change         (..)
-
+    , Event(..)
+    , TopologyChange(..)
+    , SchemaChange(..)
+    , StatusChange(..)
+    , Change(..)
       -- ** Error
-    , Error     (..)
-    , WriteType (..)
-
+    , Error(..)
+    , WriteType(..)
       -- * Row, Tuple and Record
     , module Database.XCQL.Protocol.Tuple
     , module Database.XCQL.Protocol.Record

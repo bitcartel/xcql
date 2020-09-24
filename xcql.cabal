@@ -4,19 +4,15 @@ synopsis:             Cassandra CQL binary protocol.
 stability:            experimental
 license:              OtherLicense
 license-file:         LICENSE
-author:               Toralf Wittner, Roman S. Borschel
-maintainer:           Toralf Wittner <tw@dtex.org>,
-                      Roman S. Borschel <roman@pkaboo.org>
-copyright:            (C) 2014-2015 Toralf Wittner, Roman S. Borschel
-homepage:             https://gitlab.com/twittner/cql/
-bug-reports:          https://gitlab.com/twittner/cql/issues
+maintainer:           Xoken Labs
+copyright:            (C) 2020 Xoken Labs
+homepage:             https://gitlab.com/xoken/xcql/
+bug-reports:          https://gitlab.com/xoken/xcql/issues
 category:             Database
 build-type:           Simple
 cabal-version:        >= 1.10
 extra-source-files:   README.md
-                      CHANGELOG
-                      CONTRIBUTING
-                      AUTHORS
+
 
 description:
     Implementation of Cassandra's CQL Binary Protocol
@@ -36,7 +32,7 @@ flag incompatible-varint
 
 source-repository head
     type:     git
-    location: https://gitlab.com/twittner/cql
+    location: https://gitlab.com/xoken/xcql
 
 library
     default-language: Haskell2010

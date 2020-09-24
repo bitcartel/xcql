@@ -1,8 +1,8 @@
-{-# LANGUAGE CPP          #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Database.XCQL.Protocol.Record
-    ( Record    (..)
+    ( Record(..)
     , TupleType
     , recordInstance
     ) where
@@ -16,7 +16,6 @@ typeSynDecl x y z = TySynInstD x (TySynEqn [y] z)
 #else
 typeSynDecl x y z = TySynInstD (TySynEqn Nothing (AppT (ConT x) y) z)
 #endif
-
 type family TupleType a
 
 -- | Record/Tuple conversion.
@@ -46,7 +45,7 @@ type family TupleType a
 -- @
 --
 class Record a where
-    asTuple  :: a -> TupleType a
+    asTuple :: a -> TupleType a
     asRecord :: TupleType a -> a
 
 recordInstance :: Name -> Q [Dec]
@@ -54,21 +53,21 @@ recordInstance n = do
     i <- reify n
     case i of
         TyConI d -> start d
-        _        -> fail "expecting record type"
+        _ -> fail "expecting record type"
 
 start :: Dec -> Q [Dec]
 start (DataD _ tname _ _ cons _) = do
-    unless (length cons == 1) $
-        fail "expecting single data constructor"
+    unless (length cons == 1) $ fail "expecting single data constructor"
     tt <- tupleType (head cons)
     at <- asTupleDecl (head cons)
     ar <- asRecrdDecl (head cons)
     return
         [ typeSynDecl (mkName "TupleType") (ConT tname) tt
-        , InstanceD Nothing [] (ConT (mkName "Record") $: ConT tname)
-            [ FunD (mkName "asTuple")  [at]
-            , FunD (mkName "asRecord") [ar]
-            ]
+        , InstanceD
+              Nothing
+              []
+              (ConT (mkName "Record") $: ConT tname)
+              [FunD (mkName "asTuple") [at], FunD (mkName "asRecord") [ar]]
         ]
 start _ = fail "unsupported data type"
 
@@ -78,27 +77,27 @@ tupleType c = do
     return $ foldl1 ($:) (TupleT (length tt) : types c)
   where
     types (NormalC _ tt) = map snd tt
-    types (RecC _ tt)    = map (\(_, _, t) -> t) tt
-    types _              = fail "record and normal constructors only"
+    types (RecC _ tt) = map (\(_, _, t) -> t) tt
+    types _ = fail "record and normal constructors only"
 
-asTupleDecl ::Con -> Q Clause
+asTupleDecl :: Con -> Q Clause
 asTupleDecl c =
     case c of
         (NormalC n t) -> go n t
-        (RecC    n t) -> go n t
-        _             -> fail "record and normal constructors only"
+        (RecC n t) -> go n t
+        _ -> fail "record and normal constructors only"
   where
     go n t = do
         vars <- replicateM (length t) (newName "a")
         return $ Clause [ConP n (map VarP vars)] (body vars) []
     body = NormalB . TupE . map VarE
 
-asRecrdDecl ::Con -> Q Clause
+asRecrdDecl :: Con -> Q Clause
 asRecrdDecl c =
     case c of
         (NormalC n t) -> go n t
-        (RecC    n t) -> go n t
-        _             -> fail "record and normal constructors only"
+        (RecC n t) -> go n t
+        _ -> fail "record and normal constructors only"
   where
     go n t = do
         vars <- replicateM (length t) (newName "a")
@@ -110,4 +109,3 @@ asRecrdDecl c =
 
 ($:) :: Type -> Type -> Type
 ($:) = AppT
-
